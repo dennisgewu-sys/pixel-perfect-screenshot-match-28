@@ -16,11 +16,11 @@ export function Field({
 }: {
   id: string;
   label: string;
-  error?: string;
+  error?: string | undefined;
   required?: boolean;
-  hint?: string;
+  hint?: string | undefined;
   children: ReactNode;
-  className?: string;
+  className?: string | undefined;
 }) {
   return (
     <div className={cn("space-y-1.5", className)}>
@@ -49,7 +49,7 @@ export function ConsentCheckbox({
   id: string;
   checked: boolean;
   onChange: (v: boolean) => void;
-  error?: string;
+  error?: string | undefined;
   children?: ReactNode;
 }) {
   return (
