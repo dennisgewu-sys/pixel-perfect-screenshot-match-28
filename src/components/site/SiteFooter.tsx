@@ -28,14 +28,14 @@ export function SiteFooter() {
           <div>
             <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-gold">Explore</h2>
             <ul className="space-y-2 text-sm text-on-dark-muted">
-              {[
+              {([
                 ["/about", "About Us"],
                 ["/pillars", "Our Pillars"],
                 ["/programmes", "Programmes"],
                 ["/projects", "Projects & Impact"],
                 ["/leadership", "Leadership"],
                 ["/roadmap", "Roadmap"],
-              ].map(([to, label]) => (
+              ] as const).map(([to, label]) => (
                 <li key={to}>
                   <Link to={to} className="hover:text-on-dark">
                     {label}
@@ -48,14 +48,14 @@ export function SiteFooter() {
           <div>
             <h2 className="mb-4 text-sm font-bold uppercase tracking-widest text-gold">Get involved</h2>
             <ul className="space-y-2 text-sm text-on-dark-muted">
-              {[
+              {([
                 ["/get-involved", "Become a Member"],
                 ["/get-involved", "Volunteer"],
                 ["/get-involved", "Partner With Us"],
                 ["/feedback", "Community Feedback"],
                 ["/news", "News & Updates"],
                 ["/privacy", "Privacy Notice"],
-              ].map(([to, label]) => (
+              ] as const).map(([to, label]) => (
                 <li key={label}>
                   <Link to={to} className="hover:text-on-dark">
                     {label}
