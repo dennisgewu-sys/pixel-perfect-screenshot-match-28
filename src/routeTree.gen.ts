@@ -27,6 +27,9 @@ import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as ProgrammesIndexRouteImport } from './routes/programmes.index'
 import { Route as ProgrammesMentorshipClinicRouteImport } from './routes/programmes.mentorship-clinic'
+import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
+import { Route as AuthenticatedAdminProgrammesRouteImport } from './routes/_authenticated/admin.programmes'
+import { Route as AuthenticatedAdminVolunteersRouteImport } from './routes/_authenticated/admin.volunteers'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -118,6 +121,24 @@ const ProgrammesMentorshipClinicRoute =
     path: '/programmes/mentorship-clinic',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminMembersRoute =
+  AuthenticatedAdminMembersRouteImport.update({
+    id: '/members',
+    path: '/members',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProgrammesRoute =
+  AuthenticatedAdminProgrammesRouteImport.update({
+    id: '/programmes',
+    path: '/programmes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminVolunteersRoute =
+  AuthenticatedAdminVolunteersRouteImport.update({
+    id: '/volunteers',
+    path: '/volunteers',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -132,11 +153,14 @@ export interface FileRoutesByFullPath {
   '/projects': typeof ProjectsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/roadmap': typeof RoadmapRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/news/$slug': typeof NewsSlugRoute
   '/programmes/mentorship-clinic': typeof ProgrammesMentorshipClinicRoute
   '/news/': typeof NewsIndexRoute
   '/programmes/': typeof ProgrammesIndexRoute
+  '/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/admin/programmes': typeof AuthenticatedAdminProgrammesRoute
+  '/admin/volunteers': typeof AuthenticatedAdminVolunteersRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -151,11 +175,14 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/roadmap': typeof RoadmapRoute
-  '/admin': typeof AuthenticatedAdminRoute
+  '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/news/$slug': typeof NewsSlugRoute
   '/programmes/mentorship-clinic': typeof ProgrammesMentorshipClinicRoute
   '/news': typeof NewsIndexRoute
   '/programmes': typeof ProgrammesIndexRoute
+  '/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/admin/programmes': typeof AuthenticatedAdminProgrammesRoute
+  '/admin/volunteers': typeof AuthenticatedAdminVolunteersRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -172,11 +199,14 @@ export interface FileRoutesById {
   '/projects': typeof ProjectsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/roadmap': typeof RoadmapRoute
-  '/_authenticated/admin': typeof AuthenticatedAdminRoute
+  '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/news/$slug': typeof NewsSlugRoute
   '/programmes/mentorship-clinic': typeof ProgrammesMentorshipClinicRoute
   '/news/': typeof NewsIndexRoute
   '/programmes/': typeof ProgrammesIndexRoute
+  '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/_authenticated/admin/programmes': typeof AuthenticatedAdminProgrammesRoute
+  '/_authenticated/admin/volunteers': typeof AuthenticatedAdminVolunteersRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -198,6 +228,9 @@ export interface FileRouteTypes {
     | '/programmes/mentorship-clinic'
     | '/news/'
     | '/programmes/'
+    | '/admin/members'
+    | '/admin/programmes'
+    | '/admin/volunteers'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -217,6 +250,9 @@ export interface FileRouteTypes {
     | '/programmes/mentorship-clinic'
     | '/news'
     | '/programmes'
+    | '/admin/members'
+    | '/admin/programmes'
+    | '/admin/volunteers'
   id:
     | '__root__'
     | '/'
@@ -237,6 +273,9 @@ export interface FileRouteTypes {
     | '/programmes/mentorship-clinic'
     | '/news/'
     | '/programmes/'
+    | '/_authenticated/admin/members'
+    | '/_authenticated/admin/programmes'
+    | '/_authenticated/admin/volunteers'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -387,15 +426,51 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgrammesMentorshipClinicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/members': {
+      id: '/_authenticated/admin/members'
+      path: '/members'
+      fullPath: '/admin/members'
+      preLoaderRoute: typeof AuthenticatedAdminMembersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/programmes': {
+      id: '/_authenticated/admin/programmes'
+      path: '/programmes'
+      fullPath: '/admin/programmes'
+      preLoaderRoute: typeof AuthenticatedAdminProgrammesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/volunteers': {
+      id: '/_authenticated/admin/volunteers'
+      path: '/volunteers'
+      fullPath: '/admin/volunteers'
+      preLoaderRoute: typeof AuthenticatedAdminVolunteersRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
+interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
+  AuthenticatedAdminProgrammesRoute: typeof AuthenticatedAdminProgrammesRoute
+  AuthenticatedAdminVolunteersRoute: typeof AuthenticatedAdminVolunteersRoute
+}
+
+const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
+  AuthenticatedAdminProgrammesRoute: AuthenticatedAdminProgrammesRoute,
+  AuthenticatedAdminVolunteersRoute: AuthenticatedAdminVolunteersRoute,
+}
+
+const AuthenticatedAdminRouteWithChildren =
+  AuthenticatedAdminRoute._addFileChildren(AuthenticatedAdminRouteChildren)
+
 interface AuthenticatedRouteRouteChildren {
-  AuthenticatedAdminRoute: typeof AuthenticatedAdminRoute
+  AuthenticatedAdminRoute: typeof AuthenticatedAdminRouteWithChildren
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
-  AuthenticatedAdminRoute: AuthenticatedAdminRoute,
+  AuthenticatedAdminRoute: AuthenticatedAdminRouteWithChildren,
 }
 
 const AuthenticatedRouteRouteWithChildren =
