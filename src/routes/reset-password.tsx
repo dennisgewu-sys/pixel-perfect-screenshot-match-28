@@ -43,13 +43,22 @@ function ResetPasswordPage() {
   async function onSubmit(e: FormEvent) {
     e.preventDefault();
     if (loading) return;
-    if (password.length < 8) return setError("Use at least 8 characters.");
-    if (password !== confirm) return setError("The two passwords don't match.");
+    if (password.length < 8) {
+      setError("Use at least 8 characters.");
+      return;
+    }
+    if (password !== confirm) {
+      setError("The two passwords don't match.");
+      return;
+    }
     setError(null);
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password });
     setLoading(false);
-    if (error) return setError(error.message);
+    if (error) {
+      setError(error.message);
+      return;
+    }
     toast.success("Password updated.");
     navigate({ to: "/admin", replace: true });
   }

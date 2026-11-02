@@ -29,7 +29,15 @@ import { cn } from "@/lib/utils";
 const db = supabase as unknown as { from: (t: string) => any };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type Row = Record<string, any> & { id: string };
+export type Row = {
+  id: string;
+  created_at?: string;
+  updated_at?: string;
+  status?: string;
+  is_archived?: boolean;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [key: string]: any;
+};
 export type Option = { value: string; label: string };
 
 export type FieldDef = {
@@ -430,7 +438,10 @@ function RecordDialog({
     if (save.isPending) return;
     const errs = validate(config.fields, values);
     setErrors(errs);
-    if (Object.keys(errs).length) return toast.error("Please fix the highlighted fields.");
+    if (Object.keys(errs).length) {
+      toast.error("Please fix the highlighted fields.");
+      return;
+    }
     save.mutate(override);
   }
 

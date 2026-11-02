@@ -98,7 +98,10 @@ function NoRole({ staff, onSignOut }: { staff: StaffSession; onSignOut: () => vo
     setClaiming(true);
     const { error } = await supabase.rpc("claim_initial_super_admin");
     setClaiming(false);
-    if (error) return toast.error(error.message);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
     toast.success("You are now the Super Admin.");
     queryClient.invalidateQueries({ queryKey: ["staff-session"] });
   }
