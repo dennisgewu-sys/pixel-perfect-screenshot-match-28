@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ResourceManager, type ResourceConfig } from "@/components/admin/ResourceManager";
 import { RequireModule } from "@/components/admin/ui";
-import { formatDate, formatGHS, humanize } from "@/lib/format";
+import { formatDate, formatGHS } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/expenses")({ component: Page });
 
@@ -46,5 +46,3 @@ function Page() {
     </RequireModule>
   );
 }
-
-export { humanize };

@@ -27,8 +27,13 @@ import { Route as NewsIndexRouteImport } from './routes/news.index'
 import { Route as NewsSlugRouteImport } from './routes/news.$slug'
 import { Route as ProgrammesIndexRouteImport } from './routes/programmes.index'
 import { Route as ProgrammesMentorshipClinicRouteImport } from './routes/programmes.mentorship-clinic'
+import { Route as AuthenticatedAdminApplicationsRouteImport } from './routes/_authenticated/admin.applications'
+import { Route as AuthenticatedAdminDonationsRouteImport } from './routes/_authenticated/admin.donations'
+import { Route as AuthenticatedAdminEventsRouteImport } from './routes/_authenticated/admin.events'
+import { Route as AuthenticatedAdminExpensesRouteImport } from './routes/_authenticated/admin.expenses'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
 import { Route as AuthenticatedAdminProgrammesRouteImport } from './routes/_authenticated/admin.programmes'
+import { Route as AuthenticatedAdminProjectsRouteImport } from './routes/_authenticated/admin.projects'
 import { Route as AuthenticatedAdminVolunteersRouteImport } from './routes/_authenticated/admin.volunteers'
 
 const IndexRoute = IndexRouteImport.update({
@@ -121,6 +126,30 @@ const ProgrammesMentorshipClinicRoute =
     path: '/programmes/mentorship-clinic',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AuthenticatedAdminApplicationsRoute =
+  AuthenticatedAdminApplicationsRouteImport.update({
+    id: '/applications',
+    path: '/applications',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminDonationsRoute =
+  AuthenticatedAdminDonationsRouteImport.update({
+    id: '/donations',
+    path: '/donations',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminEventsRoute =
+  AuthenticatedAdminEventsRouteImport.update({
+    id: '/events',
+    path: '/events',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminExpensesRoute =
+  AuthenticatedAdminExpensesRouteImport.update({
+    id: '/expenses',
+    path: '/expenses',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminMembersRoute =
   AuthenticatedAdminMembersRouteImport.update({
     id: '/members',
@@ -131,6 +160,12 @@ const AuthenticatedAdminProgrammesRoute =
   AuthenticatedAdminProgrammesRouteImport.update({
     id: '/programmes',
     path: '/programmes',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminProjectsRoute =
+  AuthenticatedAdminProjectsRouteImport.update({
+    id: '/projects',
+    path: '/projects',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
 const AuthenticatedAdminVolunteersRoute =
@@ -158,8 +193,13 @@ export interface FileRoutesByFullPath {
   '/programmes/mentorship-clinic': typeof ProgrammesMentorshipClinicRoute
   '/news/': typeof NewsIndexRoute
   '/programmes/': typeof ProgrammesIndexRoute
+  '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
+  '/admin/donations': typeof AuthenticatedAdminDonationsRoute
+  '/admin/events': typeof AuthenticatedAdminEventsRoute
+  '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/admin/programmes': typeof AuthenticatedAdminProgrammesRoute
+  '/admin/projects': typeof AuthenticatedAdminProjectsRoute
   '/admin/volunteers': typeof AuthenticatedAdminVolunteersRoute
 }
 export interface FileRoutesByTo {
@@ -180,8 +220,13 @@ export interface FileRoutesByTo {
   '/programmes/mentorship-clinic': typeof ProgrammesMentorshipClinicRoute
   '/news': typeof NewsIndexRoute
   '/programmes': typeof ProgrammesIndexRoute
+  '/admin/applications': typeof AuthenticatedAdminApplicationsRoute
+  '/admin/donations': typeof AuthenticatedAdminDonationsRoute
+  '/admin/events': typeof AuthenticatedAdminEventsRoute
+  '/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/admin/programmes': typeof AuthenticatedAdminProgrammesRoute
+  '/admin/projects': typeof AuthenticatedAdminProjectsRoute
   '/admin/volunteers': typeof AuthenticatedAdminVolunteersRoute
 }
 export interface FileRoutesById {
@@ -204,8 +249,13 @@ export interface FileRoutesById {
   '/programmes/mentorship-clinic': typeof ProgrammesMentorshipClinicRoute
   '/news/': typeof NewsIndexRoute
   '/programmes/': typeof ProgrammesIndexRoute
+  '/_authenticated/admin/applications': typeof AuthenticatedAdminApplicationsRoute
+  '/_authenticated/admin/donations': typeof AuthenticatedAdminDonationsRoute
+  '/_authenticated/admin/events': typeof AuthenticatedAdminEventsRoute
+  '/_authenticated/admin/expenses': typeof AuthenticatedAdminExpensesRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
   '/_authenticated/admin/programmes': typeof AuthenticatedAdminProgrammesRoute
+  '/_authenticated/admin/projects': typeof AuthenticatedAdminProjectsRoute
   '/_authenticated/admin/volunteers': typeof AuthenticatedAdminVolunteersRoute
 }
 export interface FileRouteTypes {
@@ -228,8 +278,13 @@ export interface FileRouteTypes {
     | '/programmes/mentorship-clinic'
     | '/news/'
     | '/programmes/'
+    | '/admin/applications'
+    | '/admin/donations'
+    | '/admin/events'
+    | '/admin/expenses'
     | '/admin/members'
     | '/admin/programmes'
+    | '/admin/projects'
     | '/admin/volunteers'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -250,8 +305,13 @@ export interface FileRouteTypes {
     | '/programmes/mentorship-clinic'
     | '/news'
     | '/programmes'
+    | '/admin/applications'
+    | '/admin/donations'
+    | '/admin/events'
+    | '/admin/expenses'
     | '/admin/members'
     | '/admin/programmes'
+    | '/admin/projects'
     | '/admin/volunteers'
   id:
     | '__root__'
@@ -273,8 +333,13 @@ export interface FileRouteTypes {
     | '/programmes/mentorship-clinic'
     | '/news/'
     | '/programmes/'
+    | '/_authenticated/admin/applications'
+    | '/_authenticated/admin/donations'
+    | '/_authenticated/admin/events'
+    | '/_authenticated/admin/expenses'
     | '/_authenticated/admin/members'
     | '/_authenticated/admin/programmes'
+    | '/_authenticated/admin/projects'
     | '/_authenticated/admin/volunteers'
   fileRoutesById: FileRoutesById
 }
@@ -426,6 +491,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProgrammesMentorshipClinicRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/applications': {
+      id: '/_authenticated/admin/applications'
+      path: '/applications'
+      fullPath: '/admin/applications'
+      preLoaderRoute: typeof AuthenticatedAdminApplicationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/donations': {
+      id: '/_authenticated/admin/donations'
+      path: '/donations'
+      fullPath: '/admin/donations'
+      preLoaderRoute: typeof AuthenticatedAdminDonationsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/events': {
+      id: '/_authenticated/admin/events'
+      path: '/events'
+      fullPath: '/admin/events'
+      preLoaderRoute: typeof AuthenticatedAdminEventsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/expenses': {
+      id: '/_authenticated/admin/expenses'
+      path: '/expenses'
+      fullPath: '/admin/expenses'
+      preLoaderRoute: typeof AuthenticatedAdminExpensesRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/members': {
       id: '/_authenticated/admin/members'
       path: '/members'
@@ -440,6 +533,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminProgrammesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/projects': {
+      id: '/_authenticated/admin/projects'
+      path: '/projects'
+      fullPath: '/admin/projects'
+      preLoaderRoute: typeof AuthenticatedAdminProjectsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/volunteers': {
       id: '/_authenticated/admin/volunteers'
       path: '/volunteers'
@@ -451,14 +551,24 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminApplicationsRoute: typeof AuthenticatedAdminApplicationsRoute
+  AuthenticatedAdminDonationsRoute: typeof AuthenticatedAdminDonationsRoute
+  AuthenticatedAdminEventsRoute: typeof AuthenticatedAdminEventsRoute
+  AuthenticatedAdminExpensesRoute: typeof AuthenticatedAdminExpensesRoute
   AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
   AuthenticatedAdminProgrammesRoute: typeof AuthenticatedAdminProgrammesRoute
+  AuthenticatedAdminProjectsRoute: typeof AuthenticatedAdminProjectsRoute
   AuthenticatedAdminVolunteersRoute: typeof AuthenticatedAdminVolunteersRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminApplicationsRoute: AuthenticatedAdminApplicationsRoute,
+  AuthenticatedAdminDonationsRoute: AuthenticatedAdminDonationsRoute,
+  AuthenticatedAdminEventsRoute: AuthenticatedAdminEventsRoute,
+  AuthenticatedAdminExpensesRoute: AuthenticatedAdminExpensesRoute,
   AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
   AuthenticatedAdminProgrammesRoute: AuthenticatedAdminProgrammesRoute,
+  AuthenticatedAdminProjectsRoute: AuthenticatedAdminProjectsRoute,
   AuthenticatedAdminVolunteersRoute: AuthenticatedAdminVolunteersRoute,
 }
 
