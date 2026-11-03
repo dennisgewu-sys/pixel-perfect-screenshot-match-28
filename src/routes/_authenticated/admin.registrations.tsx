@@ -80,7 +80,7 @@ function Registrations() {
   });
 
   const checkIn = useMutation({
-    mutationFn: async (input: { name: string; registrationId?: string; existingId?: string; attended: boolean }) => {
+    mutationFn: async (input: { name: string; registrationId?: string | undefined; existingId?: string | undefined; attended: boolean }) => {
       if (input.existingId) {
         const { error } = await supabase
           .from("attendance")
