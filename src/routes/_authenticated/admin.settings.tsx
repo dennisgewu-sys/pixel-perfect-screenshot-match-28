@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { AdminPageHeader, Panel, RequireModule } from "@/components/admin/ui";
 import { FieldInput, validate, type FieldDef } from "@/components/admin/ResourceManager";
 import { orgSettingsQuery } from "@/hooks/use-org-settings";
+import type { TablesUpdate } from "@/integrations/supabase/types";
 
 export const Route = createFileRoute("/_authenticated/admin/settings")({ component: Page });
 
@@ -47,7 +48,9 @@ function Settings() {
 
   const save = useMutation({
     mutationFn: async () => {
-      const patch = Object.fromEntries(ALL.map((f) => [f.name, String(values[f.name] ?? "").trim() || null]));
+      const patch = Object.fromEntries(
+        ALL.map((f) => [f.name, String(values[f.name] ?? "").trim() || null]),
+      ) as TablesUpdate<"organization_settings">;
       const { error } = await supabase.from("organization_settings").update(patch).eq("id", data!.id);
       if (error) throw error;
     },
