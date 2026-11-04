@@ -1,4 +1,6 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { Link } from "@tanstack/react-router";
+import { makeReferralCode, readReferralCode, referralLink, REFERRALS_PER_LEVEL, REWARD_PER_LEVEL_GHS } from "@/lib/referrals";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -57,6 +59,12 @@ function useSubmit() {
 
 const nullIfEmpty = (v?: string | null) => (v && v.trim() ? v.trim() : null);
 
+function useReferralCode() {
+  const [ref, setRef] = useState<string | null>(null);
+  useEffect(() => setRef(readReferralCode()), []);
+  return ref;
+}
+
 // ---------- Membership ----------
 const memberSchema = z.object({
   full_name: name,
@@ -71,6 +79,7 @@ const memberSchema = z.object({
 
 export function MembershipForm() {
   const { done, setDone, loading, run } = useSubmit();
+  const ref = useReferralCode();
   const f = useForm<z.infer<typeof memberSchema>>({
     resolver: zodResolver(memberSchema),
     defaultValues: { consent: false as unknown as true },
@@ -93,6 +102,7 @@ export function MembershipForm() {
           occupation: nullIfEmpty(v.occupation),
           interests: nullIfEmpty(v.interests),
           motivation: nullIfEmpty(v.motivation),
+          referred_by_code: ref,
         }),
       )}
     >
@@ -147,6 +157,8 @@ const volunteerSchema = z.object({
 
 export function VolunteerForm() {
   const { done, setDone, loading, run } = useSubmit();
+  const ref = useReferralCode();
+  const [myCode, setMyCode] = useState(() => "");
   const f = useForm<z.infer<typeof volunteerSchema>>({
     resolver: zodResolver(volunteerSchema),
     defaultValues: { areas_of_interest: [], consent: false as unknown as true },
@@ -156,13 +168,23 @@ export function VolunteerForm() {
     return (
       <SuccessPanel title="Thank you for volunteering!" onReset={() => { f.reset(); setDone(false); }}>
         Your volunteer application has been received. Our Volunteer Coordinator will review it and contact you.
+        <ReferralLinkBox code={myCode} />
       </SuccessPanel>
     );
   return (
     <form
       noValidate
       className="grid gap-5 sm:grid-cols-2"
-      onSubmit={f.handleSubmit((v) => run("volunteer_applications", { ...v, experience: nullIfEmpty(v.experience) }))}
+      onSubmit={f.handleSubmit((v) => {
+        const code = myCode || makeReferralCode();
+        setMyCode(code);
+        return run("volunteer_applications", {
+          ...v,
+          experience: nullIfEmpty(v.experience),
+          referral_code: code,
+          referred_by_code: ref,
+        });
+      })}
     >
       <Field id="v-name" label="Full name" required error={e.full_name?.message}>
         <Input id="v-name" className={inputClass} autoComplete="name" {...f.register("full_name")} />
@@ -535,5 +557,35 @@ export function EventRegistrationForm({ eventId }: { eventId: string }) {
         <SubmitButton loading={loading}>Register for this event</SubmitButton>
       </div>
     </form>
+  );
+}
+
+function ReferralLinkBox({ code }: { code: string }) {
+  const [origin, setOrigin] = useState("");
+  useEffect(() => setOrigin(window.location.origin), []);
+  if (!code) return null;
+  const link = referralLink(origin, code);
+  return (
+    <div className="mt-4 space-y-2 rounded-lg border bg-background p-4 text-left text-sm">
+      <p className="font-semibold text-primary">Your personal invite link</p>
+      <p className="text-muted-foreground">
+        Share it. Every {REFERRALS_PER_LEVEL} people who sign up as members or volunteers through it move you up a
+        badge level and earn you GHS {REWARD_PER_LEVEL_GHS.toFixed(2)}.
+      </p>
+      <div className="flex flex-col gap-2 sm:flex-row">
+        <Input readOnly value={link} className="font-mono text-xs" onFocus={(e) => e.currentTarget.select()} />
+        <button
+          type="button"
+          className="rounded-md bg-teal px-4 py-2 text-sm font-semibold text-teal-foreground"
+          onClick={() => navigator.clipboard.writeText(link).then(() => toast.success("Link copied"))}
+        >
+          Copy link
+        </button>
+      </div>
+      <p className="text-muted-foreground">
+        Your code is <strong className="font-mono text-foreground">{code}</strong>. Keep it safe and use it to{" "}
+        <Link to="/referrals" className="font-semibold text-teal underline">check your progress</Link>.
+      </p>
+    </div>
   );
 }

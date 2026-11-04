@@ -8,6 +8,13 @@
       "when": 1793440726399,
       "tag": "0000_foundation_core_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1793754326232,
+      "tag": "0001_volunteer_referral_rewards",
+      "breakpoints": true
     }
   ]
 }
