@@ -406,6 +406,7 @@ export type Database = {
           motivation: string | null
           occupation: string | null
           phone: string
+          referred_by_code: string | null
           status: string
           updated_at: string
         }
@@ -421,6 +422,7 @@ export type Database = {
           motivation?: string | null
           occupation?: string | null
           phone: string
+          referred_by_code?: string | null
           status?: string
           updated_at?: string
         }
@@ -436,6 +438,7 @@ export type Database = {
           motivation?: string | null
           occupation?: string | null
           phone?: string
+          referred_by_code?: string | null
           status?: string
           updated_at?: string
         }
@@ -745,6 +748,7 @@ export type Database = {
           admin_notes: string | null
           areas_of_interest: string[]
           availability: string
+          badge_level: number
           community: string
           consent: boolean
           created_at: string
@@ -753,6 +757,9 @@ export type Database = {
           full_name: string
           id: string
           phone: string
+          referral_code: string | null
+          referral_count: number
+          referred_by_code: string | null
           status: string
           updated_at: string
         }
@@ -760,6 +767,7 @@ export type Database = {
           admin_notes?: string | null
           areas_of_interest?: string[]
           availability: string
+          badge_level?: number
           community: string
           consent?: boolean
           created_at?: string
@@ -768,6 +776,9 @@ export type Database = {
           full_name: string
           id?: string
           phone: string
+          referral_code?: string | null
+          referral_count?: number
+          referred_by_code?: string | null
           status?: string
           updated_at?: string
         }
@@ -775,6 +786,7 @@ export type Database = {
           admin_notes?: string | null
           areas_of_interest?: string[]
           availability?: string
+          badge_level?: number
           community?: string
           consent?: boolean
           created_at?: string
@@ -783,10 +795,107 @@ export type Database = {
           full_name?: string
           id?: string
           phone?: string
+          referral_code?: string | null
+          referral_count?: number
+          referred_by_code?: string | null
           status?: string
           updated_at?: string
         }
         Relationships: []
+      }
+      volunteer_referrals: {
+        Row: {
+          created_at: string
+          id: string
+          referred_email: string
+          referred_id: string
+          referred_name: string
+          referred_type: string
+          volunteer_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referred_email: string
+          referred_id: string
+          referred_name: string
+          referred_type: string
+          volunteer_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referred_email?: string
+          referred_id?: string
+          referred_name?: string
+          referred_type?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_referrals_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_applications"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      volunteer_rewards: {
+        Row: {
+          amount: number
+          created_at: string
+          currency: string
+          id: string
+          is_archived: boolean
+          level: number
+          notes: string | null
+          paid_on: string | null
+          payment_method: string | null
+          reference: string | null
+          status: string
+          updated_at: string
+          volunteer_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_archived?: boolean
+          level: number
+          notes?: string | null
+          paid_on?: string | null
+          payment_method?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+          volunteer_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          currency?: string
+          id?: string
+          is_archived?: boolean
+          level?: number
+          notes?: string | null
+          paid_on?: string | null
+          payment_method?: string | null
+          reference?: string | null
+          status?: string
+          updated_at?: string
+          volunteer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "volunteer_rewards_volunteer_id_fkey"
+            columns: ["volunteer_id"]
+            isOneToOne: false
+            referencedRelation: "volunteer_applications"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -794,6 +903,16 @@ export type Database = {
     }
     Functions: {
       claim_initial_super_admin: { Args: never; Returns: boolean }
+      get_referral_progress: {
+        Args: { _code: string }
+        Returns: {
+          badge_level: number
+          first_name: string
+          referral_count: number
+          rewards_earned: number
+          rewards_paid: number
+        }[]
+      }
       has_any_role: {
         Args: {
           _roles: Database["public"]["Enums"]["app_role"][]
