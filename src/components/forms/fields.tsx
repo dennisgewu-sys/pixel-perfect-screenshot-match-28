@@ -107,7 +107,7 @@ export function SuccessPanel({
     <div role="status" className="rounded-2xl border border-success/30 bg-success/10 p-8 text-center">
       <CheckCircle2 className="mx-auto mb-3 h-10 w-10 text-success" />
       <h3 className="text-xl font-bold text-primary">{title}</h3>
-      {children && <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{children}</p>}
+      {children && <div className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">{children}</div>}
       {onReset && (
         <Button variant="outline" className="mt-5" onClick={onReset}>
           Submit another response
