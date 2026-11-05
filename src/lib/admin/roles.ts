@@ -23,6 +23,7 @@ export const MODULE_ACCESS = {
   dashboard: [...ADMINS, "programme_manager", "finance_officer", "volunteer_coordinator", "editor"],
   members: [...ADMINS, "volunteer_coordinator"],
   volunteers: [...ADMINS, "volunteer_coordinator"],
+  rewards: [...ADMINS, "volunteer_coordinator", "finance_officer"],
   programmes: [...ADMINS, "programme_manager"],
   applications: [...ADMINS, "programme_manager"],
   projects: [...ADMINS, "programme_manager"],
