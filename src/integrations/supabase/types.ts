@@ -903,6 +903,7 @@ export type Database = {
     }
     Functions: {
       claim_initial_super_admin: { Args: never; Returns: boolean }
+      gen_referral_code: { Args: never; Returns: string }
       get_referral_progress: {
         Args: { _code: string }
         Returns: {
@@ -928,6 +929,7 @@ export type Database = {
         Returns: boolean
       }
       is_staff: { Args: { _user_id: string }; Returns: boolean }
+      referral_code_exists: { Args: { _code: string }; Returns: boolean }
       super_admin_exists: { Args: never; Returns: boolean }
     }
     Enums: {
