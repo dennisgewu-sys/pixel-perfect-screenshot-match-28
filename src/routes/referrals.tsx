@@ -1,6 +1,9 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Loader2 } from "lucide-react";
+import { Award, Loader2, MessageCircleQuestion } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { Textarea } from "@/components/ui/textarea";
+import { askReferralHelper } from "@/lib/ai/referral-assistant.functions";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHero } from "@/components/site/blocks";
 import { Input } from "@/components/ui/input";
@@ -28,6 +31,7 @@ function Referrals() {
   const [code, setCode] = useState("");
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<Progress | null | "none">(null);
+  const [checkedCode, setCheckedCode] = useState("");
 
   async function check(e: React.FormEvent) {
     e.preventDefault();
@@ -36,6 +40,7 @@ function Referrals() {
     const { data } = await supabase.rpc("get_referral_progress", { _code: code });
     setLoading(false);
     setResult(data && data.length ? (data[0] as Progress) : "none");
+    setCheckedCode(data && data.length ? code.trim() : "");
   }
 
   return (
@@ -98,10 +103,92 @@ function Referrals() {
                   <p className="text-2xl font-bold text-primary">GHS {totalRewardGhs(result.rewards_paid).toFixed(2)}</p>
                 </div>
               </div>
+              <ReferralHelper code={checkedCode} />
             </div>
           )}
         </div>
       </section>
     </>
+  );
+}
+
+const SUGGESTIONS = ["How close am I to my next reward?", "When will I get my GHS 100?", "Who counts as a referral?"];
+
+function ReferralHelper({ code }: { code: string }) {
+  const ask = useServerFn(askReferralHelper);
+  const [question, setQuestion] = useState("");
+  const [asked, setAsked] = useState("");
+  const [answer, setAnswer] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function submit(q: string) {
+    const text = q.trim();
+    if (text.length < 3 || loading) return;
+    setLoading(true);
+    setError(null);
+    setAnswer(null);
+    setAsked(text);
+    try {
+      const res = await ask({ data: { code, question: text } });
+      if (res.ok) {
+        setAnswer(res.answer);
+        setQuestion("");
+      } else setError(res.message);
+    } catch {
+      setError("Something went wrong. Please try again later.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3 rounded-xl border bg-background p-4">
+      <div className="flex items-center gap-2">
+        <MessageCircleQuestion className="h-5 w-5 text-teal" />
+        <h3 className="font-bold text-primary">Ask about your progress</h3>
+      </div>
+      <p className="text-xs text-muted-foreground">AI-powered answers based on your own progress. Staff have the final say on rewards.</p>
+      <div className="flex flex-wrap gap-2">
+        {SUGGESTIONS.map((s) => (
+          <button
+            key={s}
+            type="button"
+            disabled={loading}
+            onClick={() => submit(s)}
+            className="rounded-full border px-3 py-1 text-xs font-medium hover:border-teal disabled:opacity-50"
+          >
+            {s}
+          </button>
+        ))}
+      </div>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          submit(question);
+        }}
+        className="space-y-2"
+      >
+        <Textarea
+          aria-label="Your question"
+          rows={2}
+          maxLength={500}
+          placeholder="e.g. How many more people do I need for Level 2?"
+          value={question}
+          onChange={(e) => setQuestion(e.target.value)}
+        />
+        <Button type="submit" disabled={loading || question.trim().length < 3}>
+          {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Ask
+        </Button>
+      </form>
+      {(loading || answer || error) && (
+        <div className="space-y-1 rounded-lg bg-muted p-3 text-sm" aria-live="polite">
+          <p className="font-semibold text-primary">{asked}</p>
+          {loading && <p className="text-muted-foreground">Thinking…</p>}
+          {answer && <p className="whitespace-pre-line">{answer}</p>}
+          {error && <p className="text-destructive">{error}</p>}
+        </div>
+      )}
+    </div>
   );
 }
