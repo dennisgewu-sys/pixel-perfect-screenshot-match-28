@@ -33,5 +33,5 @@ export const askReferralHelper = createServerFn({ method: "POST" })
     }
     if (!rows?.length) return { ok: false as const, message: "We couldn't find that referral code." };
     const { answerReferralQuestion } = await import("./referral-assistant.server");
-    return answerReferralQuestion(apiKey, rows[0], data.question);
+    return answerReferralQuestion(apiKey, rows[0]!, data.question);
   });
