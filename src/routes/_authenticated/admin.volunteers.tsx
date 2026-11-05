@@ -3,6 +3,7 @@ import { ResourceManager, type ResourceConfig } from "@/components/admin/Resourc
 import { RequireModule } from "@/components/admin/ui";
 import { VOLUNTEER_AREAS } from "@/lib/content";
 import { formatDate } from "@/lib/format";
+import { badgeName } from "@/lib/referrals";
 
 export const Route = createFileRoute("/_authenticated/admin/volunteers")({ component: Page });
 
@@ -23,6 +24,15 @@ const config: ResourceConfig = {
       className: "hidden md:table-cell",
       render: (r) => <span className="text-xs text-muted-foreground">{(r["areas_of_interest"] ?? []).join(", ") || "—"}</span>,
     },
+    {
+      key: "referral_count",
+      label: "Invites",
+      render: (r) => (
+        <span className="text-xs">
+          {r["referral_count"] ?? 0} · {badgeName(r["badge_level"] ?? 0)}
+        </span>
+      ),
+    },
     { key: "status", label: "Status" },
     { key: "created_at", label: "Applied", render: (r) => formatDate(r.created_at), className: "hidden lg:table-cell" },
   ],
@@ -37,7 +47,14 @@ const config: ResourceConfig = {
     { name: "experience", label: "Relevant experience", type: "textarea", rows: 3 },
     { name: "admin_notes", label: "Internal notes (staff only)", type: "textarea", rows: 3 },
   ],
-  searchKeys: ["full_name", "email", "phone", "community", "availability"],
+  detail: (r) =>
+    r["referral_code"] ? (
+      <p className="text-sm">
+        Invite code <strong className="font-mono">{r["referral_code"]}</strong> · {r["referral_count"] ?? 0} sign-ups ·{" "}
+        {badgeName(r["badge_level"] ?? 0)}
+      </p>
+    ) : null,
+  searchKeys: ["referral_code", "full_name", "email", "phone", "community", "availability"],
   statusField: "status",
   statusOptions: STATUSES,
   archive: { type: "status", value: "archived", restoreTo: "new" },

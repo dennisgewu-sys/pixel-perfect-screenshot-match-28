@@ -17,6 +17,7 @@ import {
   ShieldCheck,
   UserCog,
   Users,
+  Award,
   type LucideIcon,
 } from "lucide-react";
 import type { AdminModule } from "./roles";
@@ -26,6 +27,7 @@ export type AdminNavItem = {
     | "/admin"
     | "/admin/members"
     | "/admin/volunteers"
+    | "/admin/rewards"
     | "/admin/programmes"
     | "/admin/applications"
     | "/admin/projects"
@@ -53,6 +55,7 @@ export const ADMIN_NAV: { group: string; items: AdminNavItem[] }[] = [
     items: [
       { to: "/admin/members", label: "Members", icon: Users, module: "members" },
       { to: "/admin/volunteers", label: "Volunteers", icon: HandHeart, module: "volunteers" },
+      { to: "/admin/rewards", label: "Referral rewards", icon: Award, module: "rewards" },
     ],
   },
   {

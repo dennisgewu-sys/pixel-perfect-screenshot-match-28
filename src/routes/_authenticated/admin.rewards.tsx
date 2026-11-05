@@ -16,15 +16,15 @@ const config: ResourceConfig = {
     "A GHS 100 reward is created automatically each time a volunteer's invite link brings in another 4 sign-ups. Check the sign-ups, then mark the reward paid.",
   select: "*, volunteer:volunteer_applications(full_name, phone, referral_count)",
   columns: [
-    { key: "volunteer_name", label: "Volunteer", render: (r) => <span className="font-semibold text-primary">{r.volunteer?.full_name}</span> },
-    { key: "level", label: "Badge", render: (r) => badgeName(r.level) },
-    { key: "amount", label: "Amount", render: (r) => `GHS ${Number(r.amount).toFixed(2)}` },
+    { key: "volunteer_name", label: "Volunteer", render: (r) => <span className="font-semibold text-primary">{r["volunteer"]?.full_name}</span> },
+    { key: "level", label: "Badge", render: (r) => badgeName(r["level"]) },
+    { key: "amount", label: "Amount", render: (r) => `GHS ${Number(r["amount"]).toFixed(2)}` },
     { key: "status", label: "Status" },
     { key: "created_at", label: "Earned", render: (r) => formatDate(r.created_at), className: "hidden lg:table-cell" },
   ],
   detail: (r) => (
     <p className="text-sm">
-      <strong>{r.volunteer?.full_name}</strong> · {r.volunteer?.phone} · {r.volunteer?.referral_count} total sign-ups
+      <strong>{r["volunteer"]?.full_name}</strong> · {r["volunteer"]?.phone} · {r["volunteer"]?.referral_count} total sign-ups
     </p>
   ),
   fields: [
