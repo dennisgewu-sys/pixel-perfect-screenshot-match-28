@@ -46,6 +46,7 @@ const config: ResourceConfig = {
     { value: "in_progress", label: "In progress" },
     { value: "resolved", label: "Resolved" },
   ],
+  canDelete: true,
   exportName: "contact-enquiries",
 };
 

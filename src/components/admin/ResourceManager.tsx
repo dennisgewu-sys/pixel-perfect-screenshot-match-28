@@ -1,6 +1,6 @@
 import { useMemo, useState, type ReactNode } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Archive, ArchiveRestore, ChevronLeft, ChevronRight, Download, Loader2, Plus, Search } from "lucide-react";
+import { Archive, ArchiveRestore, ChevronLeft, ChevronRight, Download, ImageUp, Loader2, Plus, Search, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -43,7 +43,7 @@ export type Option = { value: string; label: string };
 export type FieldDef = {
   name: string;
   label: string;
-  type?: "text" | "textarea" | "email" | "tel" | "number" | "date" | "datetime" | "select" | "checkbox" | "multiselect" | "url";
+  type?: "text" | "textarea" | "email" | "tel" | "number" | "date" | "datetime" | "select" | "checkbox" | "multiselect" | "url" | "image";
   options?: readonly (string | Option)[];
   required?: boolean;
   readOnly?: boolean;
@@ -70,6 +70,8 @@ export type ResourceConfig = {
   filters?: { key: string; label: string; options: readonly (string | Option)[] }[];
   archive?: { type: "flag" } | { type: "status"; value: string; restoreTo: string };
   canCreate?: boolean;
+  /** Show a permanent Delete action (the database decides which roles may use it). */
+  canDelete?: boolean;
   defaults?: Record<string, unknown>;
   beforeSave?: (values: Record<string, unknown>, isNew: boolean) => Record<string, unknown>;
   /** Read-only information shown above the edit form (e.g. what the applicant wrote). */
@@ -137,6 +139,7 @@ export function ResourceManager({ config }: { config: ResourceConfig }) {
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<Row | "new" | null>(null);
   const [confirmArchive, setConfirmArchive] = useState<Row | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<Row | null>(null);
 
   const { data: rows = [], isLoading, error } = useQuery({
     queryKey: key,
@@ -185,6 +188,24 @@ export function ResourceManager({ config }: { config: ResourceConfig }) {
       setEditing(null);
     },
     onError: (e: Error) => toast.error(e.message),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: async (row: Row) => {
+      const { data, error } = await db.from(config.table).delete().eq("id", row.id).select("id");
+      if (error) throw error;
+      if (!data?.length) throw new Error("Your role isn't allowed to delete this.");
+    },
+    onSuccess: () => {
+      toast.success(`${config.singular} deleted.`);
+      qc.invalidateQueries({ queryKey: key });
+      qc.invalidateQueries({ queryKey: ["public"] });
+      qc.invalidateQueries({ queryKey: ["admin-dashboard"] });
+      setConfirmDelete(null);
+      setEditing(null);
+    },
+    onError: (e: Error) =>
+      toast.error(e.message.includes("foreign key") ? `This ${config.singular.toLowerCase()} is linked to other records, so it can't be deleted. Archive it instead.` : e.message),
   });
 
   function exportCsv() {
@@ -359,6 +380,7 @@ export function ResourceManager({ config }: { config: ResourceConfig }) {
           onClose={() => setEditing(null)}
           onArchive={(r) => setConfirmArchive(r)}
           onRestore={(r) => archiveMutation.mutate({ row: r, restore: true })}
+          onDelete={config.canDelete ? (r) => setConfirmDelete(r) : undefined}
         />
       )}
 
@@ -385,6 +407,27 @@ export function ResourceManager({ config }: { config: ResourceConfig }) {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <AlertDialog open={!!confirmDelete} onOpenChange={(o) => !o && setConfirmDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete this {config.singular.toLowerCase()} permanently?</AlertDialogTitle>
+            <AlertDialogDescription>This cannot be undone. If you may need it later, archive it instead.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                if (confirmDelete) deleteMutation.mutate(confirmDelete);
+              }}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleteMutation.isPending && <Loader2 className="animate-spin" />} Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
@@ -396,6 +439,7 @@ function RecordDialog({
   onClose,
   onArchive,
   onRestore,
+  onDelete,
 }: {
   config: ResourceConfig;
   row: Row | null;
@@ -403,6 +447,7 @@ function RecordDialog({
   onClose: () => void;
   onArchive: (r: Row) => void;
   onRestore: (r: Row) => void;
+  onDelete?: ((r: Row) => void) | undefined;
 }) {
   const qc = useQueryClient();
   const isNew = row === null;
@@ -497,7 +542,12 @@ function RecordDialog({
         </form>
 
         <DialogFooter className="gap-2 sm:justify-between">
-          <div>
+          <div className="flex gap-1">
+            {!isNew && onDelete && (
+              <Button type="button" variant="ghost" className="text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => onDelete(row!)}>
+                <Trash2 /> Delete
+              </Button>
+            )}
             {!isNew && config.archive &&
               (archived ? (
                 <Button type="button" variant="outline" onClick={() => onRestore(row!)}>
@@ -570,6 +620,9 @@ export function FieldInput({
           {f.hint && <span className="text-xs text-muted-foreground">— {f.hint}</span>}
         </label>
       );
+    case "image":
+      input = <ImageUpload id={id} value={String(value ?? "")} disabled={f.readOnly} onChange={onChange} />;
+      break;
     case "multiselect": {
       const arr = Array.isArray(value) ? (value as string[]) : [];
       input = (
@@ -630,5 +683,59 @@ export function DetailList({ items }: { items: [string, ReactNode][] }) {
         </div>
       ))}
     </dl>
+  );
+}
+
+function ImageUpload({ id, value, disabled, onChange }: { id: string; value: string; disabled?: boolean | undefined; onChange: (v: unknown) => void }) {
+  const [busy, setBusy] = useState(false);
+  async function upload(file: File) {
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be 5 MB or smaller."); return; }
+    setBusy(true);
+    try {
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
+      const path = `uploads/${crypto.randomUUID()}.${ext}`;
+      const { error } = await supabase.storage.from("media").upload(path, file, { contentType: file.type });
+      if (error) throw error;
+      // Long-lived link so the image keeps showing on the public website.
+      const { data, error: e2 } = await supabase.storage.from("media").createSignedUrl(path, 60 * 60 * 24 * 365 * 20);
+      if (e2) throw e2;
+      onChange(data.signedUrl);
+      toast.success("Image uploaded.");
+    } catch (e) {
+      toast.error(friendlyError((e as Error).message));
+    } finally {
+      setBusy(false);
+    }
+  }
+  return (
+    <div className="space-y-2">
+      {value && (
+        <div className="relative w-fit">
+          <img src={value} alt="Selected" className="h-32 rounded-lg border object-cover" />
+          {!disabled && (
+            <Button type="button" size="icon" variant="secondary" className="absolute right-1 top-1 h-7 w-7" onClick={() => onChange("")} aria-label="Remove image">
+              <X />
+            </Button>
+          )}
+        </div>
+      )}
+      <label htmlFor={id} className={cn("inline-flex cursor-pointer items-center gap-2 rounded-lg border bg-muted/40 px-3 py-2 text-sm font-medium hover:bg-muted", (busy || disabled) && "pointer-events-none opacity-60")}>
+        {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <ImageUp className="h-4 w-4" />}
+        {busy ? "Uploading…" : value ? "Replace image" : "Upload image"}
+      </label>
+      <input
+        id={id}
+        type="file"
+        accept="image/*"
+        className="sr-only"
+        disabled={busy || disabled}
+        onChange={(e) => {
+          const f = e.target.files?.[0];
+          if (f) void upload(f);
+          e.target.value = "";
+        }}
+      />
+    </div>
   );
 }

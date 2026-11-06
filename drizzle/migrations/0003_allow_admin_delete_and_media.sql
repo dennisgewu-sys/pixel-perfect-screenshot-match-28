@@ -1,0 +1,18 @@
+GRANT DELETE ON public.news_posts, public.programmes, public.projects, public.events, public.event_registrations, public.attendance, public.programme_applications, public.donations, public.expenses, public.members, public.contact_enquiries, public.community_feedback TO authenticated;
+
+CREATE POLICY "Editors delete news" ON public.news_posts FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','editor']::public.app_role[]));
+CREATE POLICY "Programme staff delete programmes" ON public.programmes FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','programme_manager']::public.app_role[]));
+CREATE POLICY "Programme staff delete projects" ON public.projects FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','programme_manager']::public.app_role[]));
+CREATE POLICY "Programme staff delete events" ON public.events FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','programme_manager']::public.app_role[]));
+CREATE POLICY "Programme staff delete registrations" ON public.event_registrations FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','programme_manager']::public.app_role[]));
+CREATE POLICY "Programme staff delete attendance" ON public.attendance FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','programme_manager']::public.app_role[]));
+CREATE POLICY "Programme staff delete applications" ON public.programme_applications FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','programme_manager']::public.app_role[]));
+CREATE POLICY "Finance deletes donations" ON public.donations FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','finance_officer']::public.app_role[]));
+CREATE POLICY "Finance deletes expenses" ON public.expenses FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','finance_officer']::public.app_role[]));
+CREATE POLICY "Membership staff delete members" ON public.members FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','volunteer_coordinator']::public.app_role[]));
+CREATE POLICY "Admins delete enquiries" ON public.contact_enquiries FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin']::public.app_role[]));
+CREATE POLICY "Admins delete feedback" ON public.community_feedback FOR DELETE TO authenticated USING (public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin']::public.app_role[]));
+
+CREATE POLICY "Public reads media" ON storage.objects FOR SELECT USING (bucket_id = 'media');
+CREATE POLICY "Content staff upload media" ON storage.objects FOR INSERT TO authenticated WITH CHECK (bucket_id = 'media' AND public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','editor','programme_manager']::public.app_role[]));
+CREATE POLICY "Content staff remove media" ON storage.objects FOR DELETE TO authenticated USING (bucket_id = 'media' AND public.has_any_role(auth.uid(), ARRAY['super_admin','foundation_admin','editor','programme_manager']::public.app_role[]));

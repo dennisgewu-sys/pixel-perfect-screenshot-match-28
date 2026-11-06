@@ -42,6 +42,7 @@ const config: ResourceConfig = {
     { value: "info_requested", label: "Request more info" },
   ],
   detail: (r) => <DetailList items={[["Consent given", r["consent"] ? "Yes" : "No"], ["Applied", formatDate(r.created_at, true)]]} />,
+  canDelete: true,
   exportName: "members",
 };
 

@@ -25,7 +25,7 @@ const config: ResourceConfig = {
     { name: "category", label: "Category", type: "select", options: CATEGORIES, required: true },
     { name: "status", label: "Status", type: "select", options: STATUSES, required: true },
     { name: "author_name", label: "Author" },
-    { name: "featured_image_url", label: "Featured image link", type: "url", full: true },
+    { name: "featured_image_url", label: "Featured image", type: "image", full: true, hint: "JPG or PNG, up to 5 MB." },
     { name: "excerpt", label: "Short summary", type: "textarea", rows: 2 },
     { name: "content", label: "Article text", type: "textarea", rows: 10, hint: "Leave a blank line between paragraphs." },
   ],
@@ -40,6 +40,7 @@ const config: ResourceConfig = {
     { value: "draft", label: "Unpublish (draft)" },
   ],
   beforeSave: (v) => ({ ...v, slug: slugify(String(v["slug"] || v["title"] || "")), content: v["content"] ?? "" }),
+  canDelete: true,
   exportName: "news",
 };
 
