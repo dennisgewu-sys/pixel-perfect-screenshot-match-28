@@ -65,6 +65,20 @@ function useReferralCode() {
   return ref;
 }
 
+async function checkReferrer(
+  code: string | undefined,
+  setError: (name: "referred_by", e: { message: string }) => void,
+): Promise<boolean> {
+  if (!code) return true;
+  const { data, error } = await supabase.rpc("referral_code_exists", { _code: code });
+  if (error) return true; // don't block sign-up if the check fails
+  if (!data) {
+    setError("referred_by", { message: "We couldn't find that referral code. Check it or leave it blank." });
+    return false;
+  }
+  return true;
+}
+
 // ---------- Membership ----------
 const memberSchema = z.object({
   full_name: name,
@@ -74,6 +88,7 @@ const memberSchema = z.object({
   occupation: z.string().trim().max(120).optional(),
   interests: z.string().trim().max(1000).optional(),
   motivation: z.string().trim().max(2000).optional(),
+  referred_by: z.string().trim().toUpperCase().refine((v) => !v || /^[A-Z0-9]{6,12}$/.test(v), "Codes are 6–12 letters or numbers").optional(),
   consent,
 });
 
@@ -84,6 +99,7 @@ export function MembershipForm() {
     resolver: zodResolver(memberSchema),
     defaultValues: { consent: false as unknown as true },
   });
+  useEffect(() => { if (ref) f.setValue("referred_by", ref); }, [ref, f]);
   const e = f.formState.errors;
   if (done)
     return (
@@ -96,15 +112,16 @@ export function MembershipForm() {
     <form
       noValidate
       className="grid gap-5 sm:grid-cols-2"
-      onSubmit={f.handleSubmit((v) =>
-        run("members", {
+      onSubmit={f.handleSubmit(async ({ referred_by, ...v }) => {
+        if (!(await checkReferrer(referred_by, f.setError))) return;
+        return run("members", {
           ...v,
           occupation: nullIfEmpty(v.occupation),
           interests: nullIfEmpty(v.interests),
           motivation: nullIfEmpty(v.motivation),
-          referred_by_code: ref,
-        }),
-      )}
+          referred_by_code: nullIfEmpty(referred_by),
+        });
+      })}
     >
       <Field id="m-name" label="Full name" required error={e.full_name?.message}>
         <Input id="m-name" className={inputClass} autoComplete="name" {...f.register("full_name")} />
@@ -126,6 +143,9 @@ export function MembershipForm() {
       </Field>
       <Field id="m-mot" label="Why do you want to join?" error={e.motivation?.message} className="sm:col-span-2">
         <Textarea id="m-mot" rows={3} {...f.register("motivation")} />
+      </Field>
+      <Field id="m-ref" label="Referral code of the person who invited you (optional)" error={e.referred_by?.message} className="sm:col-span-2">
+        <Input id="m-ref" className={cn(inputClass, "font-mono uppercase")} placeholder="e.g. AB3CD7EF" autoComplete="off" {...f.register("referred_by")} />
       </Field>
       <div className="sm:col-span-2">
         <Controller
@@ -152,6 +172,7 @@ const volunteerSchema = z.object({
   areas_of_interest: z.array(z.string()).min(1, "Choose at least one area"),
   experience: z.string().trim().max(2000).optional(),
   availability: z.string().trim().min(2, "Tell us when you're available").max(200),
+  referred_by: z.string().trim().toUpperCase().refine((v) => !v || /^[A-Z0-9]{6,12}$/.test(v), "Codes are 6–12 letters or numbers").optional(),
   consent,
 });
 
@@ -163,6 +184,7 @@ export function VolunteerForm() {
     resolver: zodResolver(volunteerSchema),
     defaultValues: { areas_of_interest: [], consent: false as unknown as true },
   });
+  useEffect(() => { if (ref) f.setValue("referred_by", ref); }, [ref, f]);
   const e = f.formState.errors;
   if (done)
     return (
@@ -175,14 +197,15 @@ export function VolunteerForm() {
     <form
       noValidate
       className="grid gap-5 sm:grid-cols-2"
-      onSubmit={f.handleSubmit((v) => {
+      onSubmit={f.handleSubmit(async ({ referred_by, ...v }) => {
+        if (!(await checkReferrer(referred_by, f.setError))) return;
         const code = myCode || makeReferralCode();
         setMyCode(code);
         return run("volunteer_applications", {
           ...v,
           experience: nullIfEmpty(v.experience),
           referral_code: code,
-          referred_by_code: ref,
+          referred_by_code: nullIfEmpty(referred_by),
         });
       })}
     >
@@ -234,6 +257,9 @@ export function VolunteerForm() {
       </Field>
       <Field id="v-av" label="Availability" required error={e.availability?.message} className="sm:col-span-2">
         <Input id="v-av" className={inputClass} placeholder="e.g. Weekends, weekday evenings" {...f.register("availability")} />
+      </Field>
+      <Field id="v-ref" label="Referral code of the person who invited you (optional)" error={e.referred_by?.message} className="sm:col-span-2">
+        <Input id="v-ref" className={cn(inputClass, "font-mono uppercase")} placeholder="e.g. AB3CD7EF" autoComplete="off" {...f.register("referred_by")} />
       </Field>
       <div className="sm:col-span-2">
         <Controller
