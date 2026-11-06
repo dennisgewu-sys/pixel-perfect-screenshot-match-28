@@ -689,8 +689,8 @@ export function DetailList({ items }: { items: [string, ReactNode][] }) {
 function ImageUpload({ id, value, disabled, onChange }: { id: string; value: string; disabled?: boolean | undefined; onChange: (v: unknown) => void }) {
   const [busy, setBusy] = useState(false);
   async function upload(file: File) {
-    if (!file.type.startsWith("image/")) return toast.error("Please choose an image file.");
-    if (file.size > 5 * 1024 * 1024) return toast.error("Image must be 5 MB or smaller.");
+    if (!file.type.startsWith("image/")) { toast.error("Please choose an image file."); return; }
+    if (file.size > 5 * 1024 * 1024) { toast.error("Image must be 5 MB or smaller."); return; }
     setBusy(true);
     try {
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase().replace(/[^a-z0-9]/g, "");
