@@ -56,6 +56,7 @@ function Page() {
       { value: "accepted", label: "Accept" },
       { value: "declined", label: "Decline" },
     ],
+    canDelete: true,
     exportName: "programme-applications",
   };
 

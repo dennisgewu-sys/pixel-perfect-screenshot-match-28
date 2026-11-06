@@ -45,6 +45,7 @@ function Page() {
     canCreate: true,
     defaults: { status: "scheduled", registration_status: "closed" },
     beforeSave: (v) => ({ ...v, capacity: v["capacity"] ? Math.round(Number(v["capacity"])) : null }),
+    canDelete: true,
     exportName: "events",
   };
 
