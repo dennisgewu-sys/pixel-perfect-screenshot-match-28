@@ -36,6 +36,7 @@ const config: ResourceConfig = {
   canCreate: true,
   defaults: { payment_method: "cash", currency: "GHS", expense_date: new Date().toISOString().slice(0, 10) },
   beforeSave: (v) => ({ ...v, currency: "GHS" }),
+  canDelete: true,
   exportName: "expenses",
 };
 

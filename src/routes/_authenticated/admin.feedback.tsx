@@ -53,6 +53,7 @@ const config: ResourceConfig = {
     { value: "resolved", label: "Resolved" },
     { value: "closed", label: "Closed" },
   ],
+  canDelete: true,
   exportName: "community-feedback",
 };
 

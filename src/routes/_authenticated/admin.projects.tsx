@@ -24,7 +24,7 @@ const config: ResourceConfig = {
     { name: "location", label: "Location" },
     { name: "category", label: "Category" },
     { name: "status", label: "Status", type: "select", options: STATUSES, required: true },
-    { name: "image_url", label: "Image link", type: "url", hint: "Optional. A public https:// image address." },
+    { name: "image_url", label: "Image", type: "image", full: true, hint: "Optional. JPG or PNG, up to 5 MB." },
     { name: "start_date", label: "Start date", type: "date" },
     { name: "completion_date", label: "Completion date", type: "date" },
     { name: "description", label: "Description", type: "textarea", rows: 5 },
@@ -35,6 +35,7 @@ const config: ResourceConfig = {
   archive: { type: "flag" },
   canCreate: true,
   defaults: { status: "planned" },
+  canDelete: true,
   exportName: "projects",
 };
 

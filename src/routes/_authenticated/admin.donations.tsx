@@ -41,6 +41,7 @@ const config: ResourceConfig = {
   canCreate: true,
   defaults: { payment_method: "cash", currency: "GHS", donation_date: new Date().toISOString().slice(0, 10) },
   beforeSave: (v) => ({ ...v, currency: "GHS", donor_name: v["is_anonymous"] ? null : v["donor_name"] }),
+  canDelete: true,
   exportName: "donations",
 };
 

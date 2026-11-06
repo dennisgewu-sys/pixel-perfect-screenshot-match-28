@@ -50,6 +50,7 @@ const config: ResourceConfig = {
   canCreate: true,
   defaults: { status: "planned", registration_status: "coming_soon", sort_order: 100, is_flagship: false },
   beforeSave: (v) => ({ ...v, slug: slugify(String(v["slug"] || v["title"] || "")), sort_order: v["sort_order"] ?? 100 }),
+  canDelete: true,
   exportName: "programmes",
 };
 
